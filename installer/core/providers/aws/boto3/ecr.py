@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_ecr_client(access_key, secret_key, region):
+def get_ecr_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS ECR (Elastic COntainer Repository)
 
@@ -17,10 +17,11 @@ def get_ecr_client(access_key, secret_key, region):
         "ecr",
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def check_ecr_exists(repo_name, access_key, secret_key, region):
+def check_ecr_exists(repo_name, access_key, secret_key, session_token, region):
     """
     Check wheter the given ECR already exists in AWS account
 
@@ -33,7 +34,7 @@ def check_ecr_exists(repo_name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_ecr_client(access_key, secret_key, region)
+    client = get_ecr_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_repositories(repositoryNames=[repo_name])
         return True if len(response['repositories']) else False

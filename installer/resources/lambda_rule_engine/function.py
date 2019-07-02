@@ -71,6 +71,7 @@ class RuleEngineEventRules(CloudWatchEventRuleResource):
                     rule_name,
                     input.aws_access_key,
                     input.aws_secret_key,
+                    input.aws_session_token,
                     input.aws_region)
 
                 if exists:
@@ -92,6 +93,7 @@ class RuleEngineEventRules(CloudWatchEventRuleResource):
                     rule_name,
                     Settings.AWS_ACCESS_KEY,
                     Settings.AWS_SECRET_KEY,
+                    Settings.AWS_SESSION_TOKEN,
                     Settings.AWS_REGION)
             except Exception as e:
                 message = "\n\t ** Not able to remove targets from the rule: %s: Reason: %s **\n" % (rule_name, str(e))

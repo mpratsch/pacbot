@@ -36,4 +36,5 @@ USER_EMAIL_ID = ""
 # System reads below data from user if not updated here
 AWS_ACCESS_KEY = ""
 AWS_SECRET_KEY = ""
+AWS_SESSION_TOKEN = ""
 AWS_REGION = ""

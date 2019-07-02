@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_logs_client(access_key, secret_key, region):
+def get_logs_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS Cloudwatch Log
 
@@ -17,10 +17,11 @@ def get_logs_client(access_key, secret_key, region):
         "logs",
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def check_log_group_exists(log_group_name, access_key, secret_key, region):
+def check_log_group_exists(log_group_name, access_key, secret_key, session_token, region):
     """
     Check wheter the given cloudwatch log group already exists in AWS account
 
@@ -33,7 +34,7 @@ def check_log_group_exists(log_group_name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_logs_client(access_key, secret_key, region)
+    client = get_logs_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_log_groups(logGroupNamePrefix=log_group_name)
         return True if len(response['logGroups']) else False

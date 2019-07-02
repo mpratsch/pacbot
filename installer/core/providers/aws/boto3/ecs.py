@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_ecs_client(access_key, secret_key, region):
+def get_ecs_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS ECS
 
@@ -17,10 +17,11 @@ def get_ecs_client(access_key, secret_key, region):
         "ecs",
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def deregister_task_definition(access_key, secret_key, region, task_definition):
+def deregister_task_definition(access_key, secret_key, session_token, region, task_definition):
     """
     Deregister all revisions of a given task definition from ECS
 
@@ -30,7 +31,7 @@ def deregister_task_definition(access_key, secret_key, region, task_definition):
         region (str): AWS Region
         task_definition (str): Task definition name
     """
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
     # We need to get the list of all Active revisions of the given task definition
     # So we cannot use describe_task_definition which return the latest one only
     tasks_definitions = client.list_task_definitions(familyPrefix=task_definition)
@@ -39,7 +40,7 @@ def deregister_task_definition(access_key, secret_key, region, task_definition):
         client.deregister_task_definition(taskDefinition=task_def)
 
 
-def check_ecs_cluster_exists(cluster, access_key, secret_key, region):
+def check_ecs_cluster_exists(cluster, access_key, secret_key, session_token, region):
     """
     Check wheter the given ECS cluster already exists in AWS account
 
@@ -52,7 +53,7 @@ def check_ecs_cluster_exists(cluster, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_clusters(Names=[cluster])
         return True if len(response['clusters']) else False
@@ -60,7 +61,7 @@ def check_ecs_cluster_exists(cluster, access_key, secret_key, region):
         return False
 
 
-def check_ecs_task_definition_exists(task_definition, access_key, secret_key, region):
+def check_ecs_task_definition_exists(task_definition, access_key, secret_key, session_token, region):
     """
     Check wheter the given ECS Task definition already exists in AWS account
 
@@ -73,7 +74,7 @@ def check_ecs_task_definition_exists(task_definition, access_key, secret_key, re
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_task_definition(taskDefinition=task_definition)
         return True if response['taskDefinition'] else False
@@ -81,7 +82,7 @@ def check_ecs_task_definition_exists(task_definition, access_key, secret_key, re
         return False
 
 
-def check_ecs_service_exists(service_name, cluster, access_key, secret_key, region):
+def check_ecs_service_exists(service_name, cluster, access_key, secret_key, session_token, region):
     """
     Check wheter the given ECS CLuster service already exists in AWS account
 
@@ -94,7 +95,7 @@ def check_ecs_service_exists(service_name, cluster, access_key, secret_key, regi
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_services(services=[service_name], cluster=cluster)
         return True if len(response['services']) else False
@@ -102,7 +103,7 @@ def check_ecs_service_exists(service_name, cluster, access_key, secret_key, regi
         return False
 
 
-def get_all_task_arns(cluster, access_key, secret_key, region):
+def get_all_task_arns(cluster, access_key, secret_key, session_token, region):
     """
     Get all task arns in a given cluster
 
@@ -115,7 +116,7 @@ def get_all_task_arns(cluster, access_key, secret_key, region):
     Returns:
         taskArns (list): List of all task arns
     """
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
 
     try:
         response = client.list_tasks(cluster=cluster)
@@ -125,7 +126,7 @@ def get_all_task_arns(cluster, access_key, secret_key, region):
     return response['taskArns']
 
 
-def stop_all_tasks_in_a_cluster(cluster, access_key, secret_key, region):
+def stop_all_tasks_in_a_cluster(cluster, access_key, secret_key, session_token, region):
     """
     Terminate all tasks in a given cluster
 
@@ -135,14 +136,14 @@ def stop_all_tasks_in_a_cluster(cluster, access_key, secret_key, region):
         secret_key (str): AWS Secret Key
         region (str): AWS Region
     """
-    task_arns = get_all_task_arns(cluster, access_key, secret_key, region)
+    task_arns = get_all_task_arns(cluster, access_key, secret_key, session_token, region)
 
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
     for task_arn in task_arns:
         client.stop_task(task=task_arn, cluster=cluster)
 
 
-def delete_cluster(cluster, access_key, secret_key, region):
+def delete_cluster(cluster, access_key, secret_key, session_token, region):
     """
     Delete a cluster from AWS ECS
 
@@ -155,7 +156,7 @@ def delete_cluster(cluster, access_key, secret_key, region):
     Returns:
         boolean: True if cluster get deleted else False
     """
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
 
     try:
         client.delete_cluster(cluster=cluster)
@@ -164,7 +165,7 @@ def delete_cluster(cluster, access_key, secret_key, region):
         return False
 
 
-def delete_container_instances(cluster, access_key, secret_key, region):
+def delete_container_instances(cluster, access_key, secret_key, session_token, region):
     """
     Delete all contianer instances(Ec2) from a cluster
 
@@ -174,7 +175,7 @@ def delete_container_instances(cluster, access_key, secret_key, region):
         secret_key (str): AWS Secret Key
         region (str): AWS Region
     """
-    client = get_ecs_client(access_key, secret_key, region)
+    client = get_ecs_client(access_key, secret_key, session_token, region)
     container_arns = client.list_container_instances(cluster=cluster)['containerInstanceArns']
     for container_arn in container_arns:
         try:

@@ -42,6 +42,7 @@ class SubmitAndRuleEngineJobDefinition(BatchJobDefinitionResource):
         deregister_task_definition(
             Settings.AWS_ACCESS_KEY,
             Settings.AWS_SECRET_KEY,
+            Settings.AWS_SESSION_TOKEN,
             Settings.AWS_REGION,
             self.get_input_attr('name')
         )

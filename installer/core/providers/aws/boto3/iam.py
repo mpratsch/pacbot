@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_iam_client(access_key, secret_key):
+def get_iam_client(access_key, secret_key, session_token):
     """
     Returns the client object for AWS IAM
 
@@ -15,10 +15,11 @@ def get_iam_client(access_key, secret_key):
     return boto3.client(
         'iam',
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def get_iam_resource(access_key, secret_key):
+def get_iam_resource(access_key, secret_key, session_token):
     """
     Returns the Resource client object for AWS IAM
 
@@ -29,13 +30,14 @@ def get_iam_resource(access_key, secret_key):
     Returns:
         obj: AWS IAM Resource Object
     """
-    return boto3.resource(
-        'iam',
+    return boto3.client(
+        'sts',
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def get_user_name(access_key, secret_key):
+def get_user(access_key, secret_key, session_token):
     """
     Returns the username of the given user credentails
 
@@ -44,15 +46,15 @@ def get_user_name(access_key, secret_key):
         secret_key (str): AWS Secret Key
 
     Returns:
-        user_name (str): AWS IAM User name
+        arn (str): AWS IAM User name
     """
-    iam = get_iam_resource(access_key, secret_key)
-    user_name = iam.CurrentUser().user_name
+    iam = get_iam_resource(access_key, secret_key, session_token)
+    arn = iam.CurrentUser().arn
 
-    return user_name
+    return arn
 
 
-def get_current_user(access_key, secret_key):
+def get_current_user(access_key, secret_key, session_token):
     """
     Returns the user detials of the given user credentails
 
@@ -63,11 +65,11 @@ def get_current_user(access_key, secret_key):
     Returns:
         user (obj): AWS IAM User
     """
-    iam = get_iam_resource(access_key, secret_key)
-    return iam.CurrentUser()
+    iam = get_iam_resource(access_key, secret_key, session_token).get_caller_identity()
+    return 'ADMIN' #iam['Arn'].split('/')[-1]
 
 
-def get_aws_account_user(access_key, secret_key):
+def get_aws_account_user(access_key, secret_key, session_token):
     """
     Returns the user details of the current user
 
@@ -78,25 +80,25 @@ def get_aws_account_user(access_key, secret_key):
     Returns:
         obj: AWS IAM User
     """
-    return get_iam_resource.CurrentUser(access_key, secret_key)
+    return get_iam_resource.CurrentUser(access_key, secret_key, session_token)
 
 
-def get_iam_user_policy_names(access_key, secret_key, user_name):
+def get_iam_user_policy_names(access_key, secret_key, session_token, arn):
     """
     Returns the policy names of the current user has
 
     Args:
         access_key (str): AWS Access Key
         secret_key (str): AWS Secret Key
-        user_name (str): AWS user name
+        arn (str): AWS user name
 
     Returns:
         policy_names (list): List of policy names the current user has
     """
-    iam_client = get_iam_client(access_key, secret_key)
-    attached_policies = iam_client.list_attached_user_policies(UserName=user_name)['AttachedPolicies']
+    iam_client = get_iam_client(access_key, secret_key, session_token)
+    attached_policies = iam_client.list_attached_role_policies(RoleName=arn)['AttachedPolicies']
     attached_policy_names = [policy['PolicyName'] for policy in attached_policies]
-    user_policy_names = iam_client.list_user_policies(UserName=user_name)['PolicyNames']
+    user_policy_names = iam_client.list_role_policies(RoleName=arn)['PolicyNames']
 
     return attached_policy_names + user_policy_names
 
@@ -139,27 +141,28 @@ def get_group_policy_names(iam_client, groups):
     return policy_names
 
 
-def get_user_group_policy_names(access_key, secret_key, user_name):
+def get_user_group_policy_names(access_key, secret_key, session_token, arn):
     """
     Returns all group user policies of a user
 
     Args:
         access_key (str): AWS Access Key
         secret_key (str): AWS Secret Key
-        user_name (str): AWS user name
+        arn (str): AWS user name
 
     Returns:
         policy_names (list): List of  all goup policy names the current user has
     """
-    iam_client = get_iam_client(access_key, secret_key)
-    groups = iam_client.list_groups_for_user(UserName=user_name)['Groups']
+    iam_client = get_iam_client(access_key, secret_key, session_token)
+    #groups = iam_client.list_groups_for_user(UserName=arn)['Groups']
+    groups = iam_client.list_groups()['Groups']
     group_managed_policy_names = get_group_managed_policy_names(iam_client, groups)
     group_policy_names = get_group_policy_names(iam_client, groups)
 
     return group_managed_policy_names + group_policy_names
 
 
-def get_all_policy_names(access_key, secret_key):
+def get_all_policy_names(access_key, secret_key, session_token):
     """
     Returns all group and user policies of a user
 
@@ -170,16 +173,16 @@ def get_all_policy_names(access_key, secret_key):
     Returns:
         policy_names (list): List of  all goup policy names and user policy names the current user has
     """
-    iam = get_iam_resource(access_key, secret_key)
-    user_name = iam.CurrentUser().user_name
+    iam = get_iam_resource(access_key, secret_key, session_token)
+    arn = iam.get_caller_identity().arn
 
-    user_policy_names = get_iam_user_policy_names(access_key, secret_key, user_name)
-    user_group_policy_names = get_user_group_policy_names(access_key, secret_key, user_name)
+    user_policy_names = get_iam_user_policy_names(access_key, secret_key, session_token, arn)
+    user_group_policy_names = get_user_group_policy_names(access_key, secret_key, session_token, arn)
 
     return user_policy_names + user_group_policy_names
 
 
-def create_iam_service_linked_role(access_key, secret_key, service_name, desc):
+def create_iam_service_linked_role(access_key, secret_key, session_token, service_name, desc):
     """
     Create AWS ES service linked role
 
@@ -193,7 +196,7 @@ def create_iam_service_linked_role(access_key, secret_key, service_name, desc):
         Set: True if created else false with error
     """
     role_name = "AWSServiceRoleForAmazonElasticsearchService"
-    iam_client = get_iam_client(access_key, secret_key)
+    iam_client = get_iam_client(access_key, secret_key, session_token)
     try:
         iam_client.create_service_linked_role(
             AWSServiceName=service_name,
@@ -204,7 +207,7 @@ def create_iam_service_linked_role(access_key, secret_key, service_name, desc):
         return False, str(e)
 
 
-def check_role_exists(role_name, access_key, secret_key):
+def check_role_exists(role_name, access_key, secret_key, session_token):
     """
     Check wheter the given IAM role already exists in the AWS Account
 
@@ -216,7 +219,7 @@ def check_role_exists(role_name, access_key, secret_key):
     Returns:
         Boolean: True if env exists else False
     """
-    iam_client = get_iam_client(access_key, secret_key)
+    iam_client = get_iam_client(access_key, secret_key, session_token)
     try:
         role = iam_client.get_role(RoleName=role_name)
         return True if role else False
@@ -224,7 +227,7 @@ def check_role_exists(role_name, access_key, secret_key):
         return False
 
 
-def check_policy_exists(policy_name, access_key, secret_key, account_id):
+def check_policy_exists(policy_name, access_key, secret_key, session_token, account_id):
     """
     Check wheter the given IAM policy already exists in the AWS Account
 
@@ -236,7 +239,7 @@ def check_policy_exists(policy_name, access_key, secret_key, account_id):
     Returns:
         Boolean: True if env exists else False
     """
-    iam_client = get_iam_client(access_key, secret_key)
+    iam_client = get_iam_client(access_key, secret_key, session_token)
     policy_arn = "arn:aws:iam::%s:policy/%s" % (str(account_id), policy_name)
 
     try:
@@ -246,7 +249,7 @@ def check_policy_exists(policy_name, access_key, secret_key, account_id):
         return False
 
 
-def check_instance_profile_exists(instance_profile_name, access_key, secret_key):
+def check_instance_profile_exists(instance_profile_name, access_key, secret_key, session_token):
     """
     Check wheter the given IAM instance profile already exists in the AWS Account
 
@@ -258,7 +261,7 @@ def check_instance_profile_exists(instance_profile_name, access_key, secret_key)
     Returns:
         Boolean: True if env exists else False
     """
-    iam_client = get_iam_client(access_key, secret_key)
+    iam_client = get_iam_client(access_key, secret_key, session_token)
     try:
         profile = iam_client.get_instance_profile(InstanceProfileName=instance_profile_name)
         return True if profile else False

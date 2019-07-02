@@ -18,18 +18,19 @@ def get_provider_credentials(provider, provider_json_file):
         aws_secret_key (str): AWS secret key
         region_name (str): AWS region name
     """
-    if provider == "aws":  # TODO- write now we are supporting AWS only
+    if provider == "aws":  # TODO- right now we are supporting AWS only
         with open(provider_json_file, 'r') as jsonfile:
             data = json.load(jsonfile)
 
         aws_access_key = data['provider']['aws']['access_key']
         aws_secret_key = data['provider']['aws']['secret_key']
+        aws_session_token = data['provider']['aws']['token']
         region_name = data['provider']['aws']['region']
 
         return aws_access_key, aws_secret_key, region_name
 
 
-def get_docker_push_aws_auth_config(aws_access_key, aws_secret_key, region_name, log_file):
+def get_docker_push_aws_auth_config(aws_access_key, aws_secret_key, session_token, region_name, log_file):
     """
     Return AWS auth config for pushing docker image to ECR
 
@@ -46,7 +47,8 @@ def get_docker_push_aws_auth_config(aws_access_key, aws_secret_key, region_name,
         'ecr',
         region_name=region_name,
         aws_access_key_id=aws_access_key,
-        aws_secret_access_key=aws_secret_key)
+        aws_secret_access_key=aws_secret_key,
+        aws_session_token=session_token)
     write_to_log_file(log_file, " " * 10 + "Generating Auth token using boto3...")
 
     auth = ecr.get_authorization_token()

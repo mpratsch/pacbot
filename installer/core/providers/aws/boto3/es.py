@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_es_client(access_key, secret_key, region):
+def get_es_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS Elasticsearch
 
@@ -17,10 +17,11 @@ def get_es_client(access_key, secret_key, region):
         'es',
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def check_es_domain_exists(domain_name, access_key, secret_key, region):
+def check_es_domain_exists(domain_name, access_key, secret_key, session_token, region):
     """
     Check wheter the given ES Domain already exists in the AWS Account
 
@@ -33,7 +34,7 @@ def check_es_domain_exists(domain_name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_es_client(access_key, secret_key, region)
+    client = get_es_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_elasticsearch_domain(
             DomainName=domain_name

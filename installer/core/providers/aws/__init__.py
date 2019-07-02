@@ -57,6 +57,7 @@ class BaseAction(MsgMixin):
                 'aws': {
                     'access_key': self.input.aws_access_key,
                     'secret_key': self.input.aws_secret_key,
+                    'token'     : self.input.aws_session_token,
                     'region': self.input.aws_region
                 }
             }

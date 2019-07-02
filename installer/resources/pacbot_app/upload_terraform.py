@@ -16,7 +16,8 @@ class UploadTrraform(NullResource):
             "s3",
             region_name=Settings.AWS_REGION,
             aws_access_key_id=Settings.AWS_ACCESS_KEY,
-            aws_secret_access_key=Settings.AWS_SECRET_KEY)
+            aws_secret_access_key=Settings.AWS_SECRET_KEY,
+            aws_session_token=Settings.AWS_SESSION_TOKEN)
 
         zip_file_name = Settings.RESOURCE_NAME_PREFIX + "-terraform-installer-backup"
         zip_file_abs_path = os.path.join(Settings.BASE_APP_DIR, zip_file_name)

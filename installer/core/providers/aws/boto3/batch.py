@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_batch_client(access_key, secret_key, region):
+def get_batch_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS Batch
 
@@ -17,10 +17,11 @@ def get_batch_client(access_key, secret_key, region):
         'batch',
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def get_compute_environments(compute_envs, access_key, secret_key, region):
+def get_compute_environments(compute_envs, access_key, secret_key, session_token, region):
     """
     Returns AWS Batch compute envs list with all details
 
@@ -33,7 +34,7 @@ def get_compute_environments(compute_envs, access_key, secret_key, region):
     Returns:
         envs (list): List of all Batch compute envs with all details
     """
-    client = get_batch_client(access_key, secret_key, region)
+    client = get_batch_client(access_key, secret_key, session_token, region)
 
     response = client.describe_compute_environments(
         computeEnvironments=compute_envs
@@ -42,7 +43,7 @@ def get_compute_environments(compute_envs, access_key, secret_key, region):
     return response['computeEnvironments']
 
 
-def check_compute_env_exists(compute_env, access_key, secret_key, region):
+def check_compute_env_exists(compute_env, access_key, secret_key, session_token, region):
     """
     Check whether the given compute env name already exists in AWS account
 
@@ -55,13 +56,13 @@ def check_compute_env_exists(compute_env, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    if len(get_compute_environments([compute_env], access_key, secret_key, region)):
+    if len(get_compute_environments([compute_env], access_key, secret_key, session_token, region)):
         return True
     else:
         return False
 
 
-def get_job_definitions(job_def_name, access_key, secret_key, region):
+def get_job_definitions(job_def_name, access_key, secret_key, session_token, region):
     """
     Get all job definition versions with details
 
@@ -82,7 +83,7 @@ def get_job_definitions(job_def_name, access_key, secret_key, region):
     return response['jobDefinitions']
 
 
-def check_job_definition_exists(job_def_name, access_key, secret_key, region):
+def check_job_definition_exists(job_def_name, access_key, secret_key, session_token, region):
     """
     Check whether the given job definiiton exists in AWS Batch
 
@@ -95,15 +96,15 @@ def check_job_definition_exists(job_def_name, access_key, secret_key, region):
     Returns:
         Boolean: True if it already exists else False
     """
-    client = get_batch_client(access_key, secret_key, region)
+    client = get_batch_client(access_key, secret_key, session_token, region)
     try:
-        job_definitions = get_job_definitions(job_def_name, access_key, secret_key, region)
+        job_definitions = get_job_definitions(job_def_name, access_key, secret_key, session_token, region)
         return True if len(job_definitions) else False
     except:
         return False
 
 
-def check_job_queue_exists(job_queue_name, access_key, secret_key, region):
+def check_job_queue_exists(job_queue_name, access_key, secret_key, session_token, region):
     """
     Check whether the given job queue exists in AWS Batch
 
@@ -116,7 +117,7 @@ def check_job_queue_exists(job_queue_name, access_key, secret_key, region):
     Returns:
         Boolean: True if it already exists else False
     """
-    client = get_batch_client(access_key, secret_key, region)
+    client = get_batch_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_job_queues(
             jobQueues=[job_queue_name],

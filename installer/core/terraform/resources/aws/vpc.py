@@ -62,6 +62,7 @@ class SecurityGroupResource(TerraformResource):
                 self.get_input_attr('vpc_id'),
                 input.aws_access_key,
                 input.aws_secret_key,
+                input.aws_session_token,
                 input.aws_region)
 
         return exists, checked_details

@@ -65,6 +65,7 @@ class Upgrade(BaseCommand):
                 ApplicationLoadBalancer.get_input_attr('name'),
                 Settings.AWS_ACCESS_KEY,
                 Settings.AWS_SECRET_KEY,
+                Settings.AWS_SESSION_TOKEN,
                 Settings.AWS_REGION)
 
             tg_resources = self._get_resources_of_a_given_class_type(resources_to_process, ALBTargetGroupResource)
@@ -73,6 +74,7 @@ class Upgrade(BaseCommand):
                 tg_names,
                 Settings.AWS_ACCESS_KEY,
                 Settings.AWS_SECRET_KEY,
+                Settings.AWS_SESSION_TOKEN,
                 Settings.AWS_REGION)
 
     def upgrade_pacbot(self, input_instance):

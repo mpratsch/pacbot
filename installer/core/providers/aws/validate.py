@@ -33,6 +33,7 @@ class SystemValidation(MsgMixin, metaclass=ABCMeta):
                 vpcs = vpc.get_vpc_details(
                     Settings.AWS_ACCESS_KEY,
                     Settings.AWS_SECRET_KEY,
+                    Settings.AWS_SESSION_TOKEN,
                     Settings.AWS_REGION,
                     vpc_ids
                 )
@@ -65,6 +66,7 @@ class SystemValidation(MsgMixin, metaclass=ABCMeta):
                         valid_subnets = vpc.get_vpc_subnets(
                             Settings.AWS_ACCESS_KEY,
                             Settings.AWS_SECRET_KEY,
+                            Settings.AWS_SESSION_TOKEN,
                             Settings.AWS_REGION,
                             vpc_ids
                         )
@@ -90,18 +92,18 @@ class SystemValidation(MsgMixin, metaclass=ABCMeta):
         Returns:
             boolean: True if all policies are present else False
         """
-        access_key, secret_key = Settings.AWS_ACCESS_KEY, Settings.AWS_SECRET_KEY
-        current_aws_user = iam.get_current_user(access_key, secret_key)
-        user_name = current_aws_user.user_name
+        access_key, secret_key, session_token = Settings.AWS_ACCESS_KEY, Settings.AWS_SECRET_KEY, Settings.AWS_SESSION_TOKEN
+        current_aws_user = iam.get_current_user(access_key, secret_key, session_token)
+        arn = current_aws_user
 
-        if user_name:
+        if arn:
             # warning_message = "Policies (" + ", ".join(Settings.AWS_POLICIES_REQUIRED) + ") are required"
             # self.show_step_inner_warning(warning_message)
 
-            if self._check_user_policies(access_key, secret_key, user_name):
+            if self._check_user_policies(access_key, secret_key, session_token, arn):
                 return True
 
-            if self._check_group_policies(access_key, secret_key, user_name):
+            if self._check_group_policies(access_key, secret_key, session_token, arn):
                 return True
 
             yes_or_no = input("\n\t%s: " % self._input_message_in_color(K.POLICY_YES_NO))
@@ -115,14 +117,14 @@ class SystemValidation(MsgMixin, metaclass=ABCMeta):
         else:
             False
 
-    def _check_group_policies(self, access_key, secret_key, user_name):
+    def _check_group_policies(self, access_key, secret_key, session_token, arn):
         """
         Check required policies are present in user-group policies or not. Required policies are kept in the settings AWS_POLICIES_REQUIRED
 
         Returns:
             boolean: True if all policies are present else False
         """
-        group_policy_names = iam.get_user_group_policy_names(access_key, secret_key, user_name)
+        group_policy_names = iam.get_user_group_policy_names(access_key, secret_key, session_token, arn)
 
         if self._has_full_access_policies(group_policy_names):
             self.show_step_inner_messaage(K.FULL_ACCESS_POLICY, K.PRESENT, None)
@@ -136,14 +138,14 @@ class SystemValidation(MsgMixin, metaclass=ABCMeta):
 
         return True
 
-    def _check_user_policies(self, access_key, secret_key, user_name):
+    def _check_user_policies(self, access_key, secret_key, session_token, arn):
         """
         This method uses the above methods and validate required policies are present in combine User and Group policies
 
         Returns:
             boolean: True if all policies are present else False
         """
-        user_policy_names = iam.get_iam_user_policy_names(access_key, secret_key, user_name)
+        user_policy_names = iam.get_iam_user_policy_names(access_key, secret_key, session_token, arn)
 
         if self._has_full_access_policies(user_policy_names):
             self.show_step_inner_messaage(K.FULL_ACCESS_POLICY, K.PRESENT, None)

@@ -13,6 +13,7 @@ class SystemInput(MsgMixin, metaclass=ABCMeta):
         self.show_step_heading(K.INPUT_READING_STARTED)
         self.read_aws_access_key()
         self.read_aws_secret_key()
+        self.read_aws_session_token()
         self.read_aws_region()
         self.load_aws_account_id()
         self.show_step_finish(K.INPUT_READING_COMPLETED)
@@ -43,6 +44,20 @@ class SystemInput(MsgMixin, metaclass=ABCMeta):
         else:
             self.aws_secret_key = settings_secret_key
 
+    def read_aws_session_token(self):
+        """Read AWS session token from user if it is not already set in settings"""
+        settings_session_token = getattr(Settings, 'AWS_SESSION_TOKEN', None)
+        if settings_session_token is None or settings_session_token == '':
+            self.aws_session_token = input("\n\t%s" % K.AWS_SESSION_TOKEN_INPUT)
+
+            if len(self.aws_session_token) < 25:
+                self.show_step_inner_error("\n\t" + K.INVALID_KEY)
+                raise Exception(K.INVALID_KEY)
+
+            Settings.set('AWS_SESSION_TOKEN', self.aws_session_token)
+        else:
+            self.aws_session_token = settings_session_token
+
     def read_aws_region(self):
         """Read AWS region from user if it is not already set in settings"""
         settings_region = getattr(Settings, 'AWS_REGION', None)
@@ -54,7 +69,7 @@ class SystemInput(MsgMixin, metaclass=ABCMeta):
 
     def load_aws_account_id(self):
         """Find AWS Account ID from the credentials given"""
-        aws_account_id = get_user_account_id(Settings.AWS_ACCESS_KEY, Settings.AWS_SECRET_KEY)
+        aws_account_id = get_user_account_id(Settings.AWS_ACCESS_KEY, Settings.AWS_SECRET_KEY, Settings.AWS_SESSION_TOKEN)
         Settings.set('AWS_ACCOUNT_ID', aws_account_id)
         self.aws_account_id = aws_account_id
 
@@ -86,5 +101,6 @@ class SystemStatusInput(SystemInput):
     def read_input(self):
         Settings.set('AWS_ACCESS_KEY', "TempAccessKey")
         Settings.set('AWS_SECRET_KEY', "TempSecretKey")
+        Settings.set('AWS_SESSION_TOKEN', "TempSessionToken")
         Settings.set('AWS_REGION', "TempRegion")
         Settings.set('AWS_ACCOUNT_ID', "TempAccountId")

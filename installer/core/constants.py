@@ -28,6 +28,7 @@ INPUT_READING_COMPLETED = "Required inputs are available!!!"
 
 AWS_ACCESS_KEY_INPUT = "Please enter AWS access key: "
 AWS_SECRET_KEY_INPUT = "Please enter AWS secret key: "
+AWS_SESSION_TOKEN_INPUT = "Please enter the AWS session token: "
 AWS_REGION_INPUT = "Please enter region: "
 INVALID_KEY = "Entered invalid Key!!!"
 SETTINGS_CHECK_STARTED = "Checking settings and inputs"

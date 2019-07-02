@@ -109,6 +109,7 @@ class Redeploy(BaseCommand):
                 ApplicationLoadBalancer.get_input_attr('name'),
                 Settings.AWS_ACCESS_KEY,
                 Settings.AWS_SECRET_KEY,
+                Settings.AWS_SESSION_TOKEN,
                 Settings.AWS_REGION)
 
             tg_resources = self._get_resources_of_a_given_class_type(resources_to_process, ALBTargetGroupResource)
@@ -117,6 +118,7 @@ class Redeploy(BaseCommand):
                 tg_names,
                 Settings.AWS_ACCESS_KEY,
                 Settings.AWS_SECRET_KEY,
+                Settings.AWS_SESSION_TOKEN,
                 Settings.AWS_REGION)
 
     def inactivate_required_services_for_redeploy(self, resources_to_process, dry_run):
@@ -139,6 +141,7 @@ class Redeploy(BaseCommand):
                         deregister_task_definition(
                             Settings.AWS_ACCESS_KEY,
                             Settings.AWS_SECRET_KEY,
+                            Settings.AWS_SESSION_TOKEN,
                             Settings.AWS_REGION,
                             resource.get_input_attr('family'),
                         )
@@ -156,6 +159,7 @@ class Redeploy(BaseCommand):
                         cluster_name,
                         Settings.AWS_ACCESS_KEY,
                         Settings.AWS_SECRET_KEY,
+                        Settings.AWS_SESSION_TOKEN,
                         Settings.AWS_REGION
                     )
                 except:

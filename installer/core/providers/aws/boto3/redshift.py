@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_redshift_client(access_key, secret_key, region):
+def get_redshift_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS Redshift
 
@@ -17,10 +17,11 @@ def get_redshift_client(access_key, secret_key, region):
         'redshift',
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def check_redshift_cluster_exists(cluster_identifier, access_key, secret_key, region):
+def check_redshift_cluster_exists(cluster_identifier, access_key, secret_key, session_token, region):
     """
     Check wheter the given Redshift cluster already exists in the AWS Account
 
@@ -33,7 +34,7 @@ def check_redshift_cluster_exists(cluster_identifier, access_key, secret_key, re
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_redshift_client(access_key, secret_key, region)
+    client = get_redshift_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_clusters(
             ClusterIdentifier=cluster_identifier
@@ -43,7 +44,7 @@ def check_redshift_cluster_exists(cluster_identifier, access_key, secret_key, re
         return False
 
 
-def check_redshift_parameter_group_exists(name, access_key, secret_key, region):
+def check_redshift_parameter_group_exists(name, access_key, secret_key, session_token, region):
     """
     Check wheter the given Redshift Parameter Group already exists in the AWS Account
 
@@ -56,7 +57,7 @@ def check_redshift_parameter_group_exists(name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_redshift_client(access_key, secret_key, region)
+    client = get_redshift_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_cluster_parameter_groups(
             ParameterGroupName=name
@@ -66,7 +67,7 @@ def check_redshift_parameter_group_exists(name, access_key, secret_key, region):
         return False
 
 
-def check_redshift_subnet_group_exists(name, access_key, secret_key, region):
+def check_redshift_subnet_group_exists(name, access_key, secret_key, session_token, region):
     """
     Check wheter the given Redshift SUbnet Group already exists in the AWS Account
 
@@ -79,7 +80,7 @@ def check_redshift_subnet_group_exists(name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_redshift_client(access_key, secret_key, region)
+    client = get_redshift_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_cluster_subnet_groups(
             ClusterSubnetGroupName=name

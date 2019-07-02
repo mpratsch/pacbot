@@ -18,6 +18,7 @@ class APIEcrRepository(ECRRepository):
         status, msg = create_iam_service_linked_role(
             Settings.AWS_ACCESS_KEY,
             Settings.AWS_SECRET_KEY,
+            Settings.AWS_SESSION_TOKEN,
             "ecs.amazonaws.com",
             Settings.RESOURCE_DESCRIPTION)
 

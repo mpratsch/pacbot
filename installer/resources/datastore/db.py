@@ -65,6 +65,7 @@ class MySQLDatabase(RDSResource):
         status, msg = create_iam_service_linked_role(
             Settings.AWS_ACCESS_KEY,
             Settings.AWS_SECRET_KEY,
+            Settings.AWS_SESSION_TOKEN,
             "rds.amazonaws.com",
             Settings.RESOURCE_DESCRIPTION)
 

@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_ec2_client(access_key, secret_key, region):
+def get_ec2_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS EC2
 
@@ -17,10 +17,11 @@ def get_ec2_client(access_key, secret_key, region):
         'ec2',
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def get_vpc_details(access_key, secret_key, region, vpc_ids):
+def get_vpc_details(access_key, secret_key, session_token, region, vpc_ids):
     """
     Find VPC details of all the ids passed to this method
 
@@ -33,12 +34,12 @@ def get_vpc_details(access_key, secret_key, region, vpc_ids):
     Returns:
         VPCS (list): List of all VPC objects
     """
-    response = get_ec2_client(access_key, secret_key, region).describe_vpcs(VpcIds=vpc_ids)
+    response = get_ec2_client(access_key, secret_key, session_token, region).describe_vpcs(VpcIds=vpc_ids)
 
     return response["Vpcs"]
 
 
-def get_vpc_subnets(access_key, secret_key, region, vpc_ids):
+def get_vpc_subnets(access_key, secret_key, session_token, region, vpc_ids):
     """
     Find all subnets under a VPC
 
@@ -51,7 +52,7 @@ def get_vpc_subnets(access_key, secret_key, region, vpc_ids):
     Returns:
         Subnets (list): List of all subnets object
     """
-    response = get_ec2_client(access_key, secret_key, region).describe_subnets(Filters=[
+    response = get_ec2_client(access_key, secret_key, session_token, region).describe_subnets(Filters=[
         {
             'Name': 'vpc-id',
             'Values': vpc_ids
@@ -61,7 +62,7 @@ def get_vpc_subnets(access_key, secret_key, region, vpc_ids):
     return response['Subnets']
 
 
-def check_security_group_exists(group_name, vpc_id, access_key, secret_key, region):
+def check_security_group_exists(group_name, vpc_id, access_key, secret_key, session_token, region):
     """
     Check wheter the given security group already exists in the AWS Account
 
@@ -75,7 +76,7 @@ def check_security_group_exists(group_name, vpc_id, access_key, secret_key, regi
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_ec2_client(access_key, secret_key, region)
+    client = get_ec2_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_security_groups(
             Filters=[

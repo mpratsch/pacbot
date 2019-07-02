@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_rds_client(access_key, secret_key, region):
+def get_rds_client(access_key, secret_key, session_token, region):
     """
     Returns the client object for AWS RDS
 
@@ -17,10 +17,11 @@ def get_rds_client(access_key, secret_key, region):
         'rds',
         region_name=region,
         aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key)
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token)
 
 
-def check_rds_instance_exists(instance_identifier, access_key, secret_key, region):
+def check_rds_instance_exists(instance_identifier, access_key, secret_key, session_token, region):
     """
     Check wheter the given RDS Instance already exists in the AWS Account
 
@@ -33,7 +34,7 @@ def check_rds_instance_exists(instance_identifier, access_key, secret_key, regio
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_rds_client(access_key, secret_key, region)
+    client = get_rds_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_db_instances(
             DBInstanceIdentifier=instance_identifier
@@ -43,7 +44,7 @@ def check_rds_instance_exists(instance_identifier, access_key, secret_key, regio
         return False
 
 
-def check_rds_option_group_exists(name, access_key, secret_key, region):
+def check_rds_option_group_exists(name, access_key, secret_key, session_token, region):
     """
     Check wheter the given RDS Option Group already exists in the AWS Account
 
@@ -56,7 +57,7 @@ def check_rds_option_group_exists(name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_rds_client(access_key, secret_key, region)
+    client = get_rds_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_option_groups(
             OptionGroupName=name
@@ -66,7 +67,7 @@ def check_rds_option_group_exists(name, access_key, secret_key, region):
         return False
 
 
-def check_rds_parameter_group_exists(name, access_key, secret_key, region):
+def check_rds_parameter_group_exists(name, access_key, secret_key, session_token, region):
     """
     Check wheter the given RDS Parameter Group already exists in the AWS Account
 
@@ -79,7 +80,7 @@ def check_rds_parameter_group_exists(name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_rds_client(access_key, secret_key, region)
+    client = get_rds_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_db_parameter_groups(
             DBParameterGroupName=name
@@ -89,7 +90,7 @@ def check_rds_parameter_group_exists(name, access_key, secret_key, region):
         return False
 
 
-def check_rds_subnet_group_exists(name, access_key, secret_key, region):
+def check_rds_subnet_group_exists(name, access_key, secret_key, session_token, region):
     """
     Check wheter the given RDS SUbnet Group already exists in the AWS Account
 
@@ -102,7 +103,7 @@ def check_rds_subnet_group_exists(name, access_key, secret_key, region):
     Returns:
         Boolean: True if env exists else False
     """
-    client = get_rds_client(access_key, secret_key, region)
+    client = get_rds_client(access_key, secret_key, session_token, region)
     try:
         response = client.describe_db_subnet_groups(
             DBSubnetGroupName=name

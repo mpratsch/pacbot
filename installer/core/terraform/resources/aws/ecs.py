@@ -38,6 +38,7 @@ class ECSClusterResource(TerraformResource):
                 checked_details['value'],
                 input.aws_access_key,
                 input.aws_secret_key,
+                input.aws_session_token,
                 input.aws_region)
 
         return exists, checked_details
@@ -85,6 +86,7 @@ class ECSTaskDefinitionResource(TerraformResource):
                 checked_details['value'],
                 input.aws_access_key,
                 input.aws_secret_key,
+                input.aws_session_token,
                 input.aws_region)
 
         return exists, checked_details
