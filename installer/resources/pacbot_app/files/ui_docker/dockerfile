@@ -7,7 +7,7 @@ ENV NGINX_VERSION 1.14.0
 ARG HTML_FILE
 ENV HTML_FILE=$HTML_FILE
 
-RUN apk add --no-cache curl python unzip && cd /tmp/ && curl -O https://bootstrap.pypa.io/get-pip.py && python get-pip.py && pip install awscli
+RUN apk add --no-cache curl python unzip && cd /tmp/ && curl -kO https://bootstrap.pypa.io/get-pip.py && python get-pip.py  --trusted-host pypi.org --trusted-host files.pythonhosted.org  && pip install awscli  --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
     && CONFIG="\
@@ -70,8 +70,8 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
         libxslt-dev \
         gd-dev \
         geoip-dev \
-    && curl -fSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
-    && curl -fSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
+    && curl -kfSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
+    && curl -kfSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
     && export GNUPGHOME="$(mktemp -d)" \
     && found=''; \
     for server in \
@@ -81,7 +81,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
         pgp.mit.edu \
     ; do \
         echo "Fetching GPG key $GPG_KEYS from $server"; \
-        gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
+        gpg --keyserver "$server" --keyserver-options "http-proxy=http://proxy.r-services.at:57165, timeout=10" --recv-keys "$GPG_KEYS" && found=yes && break; \
     done; \
     test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
     gpg --batch --verify nginx.tar.gz.asc nginx.tar.gz \

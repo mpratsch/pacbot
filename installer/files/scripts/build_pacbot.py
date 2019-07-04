@@ -17,8 +17,8 @@ class Buildpacbot(object):
         archive_type (str): Archive format
         issue_email_template (str): file to make public after uploading to s3
     """
-    mvn_build_command = "mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V"
-    mvn_clean_command = "mvn clean"
+    mvn_build_command = "export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64; mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -DproxySet=true -DproxyHost=proxy.r-services.at -DproxyPort=57165"
+    mvn_clean_command = "export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64; mvn clean -DproxySet=true -DproxyHost=proxy.r-services.at -DproxyPort=57165"
     archive_type = "zip"  # What type of archive is required
     issue_email_template = ''
 
@@ -81,6 +81,7 @@ class Buildpacbot(object):
         print("Email templates upload to S3 completed!!!\n")
 
     def run_bash_command(self, command, exec_dir):
+        print("Start run_bash_command")
         """
         Run bash command supplied to be run
 
@@ -105,6 +106,7 @@ class Buildpacbot(object):
         return stdout, stderr
 
     def build_jar_and_ui_from_code(self, aws_access_key, aws_secret_key, aws_session_token, region, bucket, s3_key_prefix):
+        print("Start build_jar_and_ui_from_code")
         """
         Build jars and upload to S3
 
@@ -124,8 +126,8 @@ class Buildpacbot(object):
     def build_api_job_jars(self, working_dir):
         print("Started building the jar...............\n")
         self.write_to_debug_log("Maven build started...(Please check %s log for more details)" % str(self.maven_build_log))
-
         stdout, stderr = self.run_bash_command(self.mvn_clean_command, working_dir)
+        self.write_to_debug_log("Cleaning up done")
         stdout, stderr = self.run_bash_command(self.mvn_build_command, working_dir)
         self.write_to_debug_log("Build Completed...")
 
@@ -155,6 +157,7 @@ class Buildpacbot(object):
         return os.path.join(self.codebase_root_dir, "webapp")
 
     def _update_variables_in_ui_config(self, webapp_dir):
+        print("Start _update_variables_in_ui_config")
         config_file = os.path.join(webapp_dir, "src", "config", "configurations.ts")
         with open(config_file, 'r') as f:
             lines = f.readlines()
@@ -185,6 +188,7 @@ class Buildpacbot(object):
         os.remove(original_config_file)
 
     def archive_ui_app_build(self, aws_access_key, aws_secret_key, aws_session_token, region, bucket, s3_key_prefix):
+        print("Start archive_ui_app_build")
         s3_client = s3 = boto3.client('s3', region_name=region, aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, aws_session_token=aws_session_token)
         zip_file_name = self.upload_dir + "/dist"
 

@@ -20,9 +20,9 @@ export const CONFIGURATIONS = {
     required: {
         APP_NAME: 'PacBot',
         domains: {
-            PROD_BASE_URL: '', // Expected values: domain where the API is deployed, ex: http://beta.pacbot.com/api
-            STG_BASE_URL: '', // Expected values: domain where the API is deployed, ex: http://stgbeta.pacbot.com/api
-            DEV_BASE_URL: '', // Expected values: domain where the API is deployed, ex: http://devbeta.pacbot.com/api
+            PROD_BASE_URL: 'http://internal-pacbot-1124722398.eu-central-1.elb.amazonaws.com/api', // Expected values: domain where the API is deployed, ex: http://beta.pacbot.com/api
+            STG_BASE_URL: 'http://internal-pacbot-1124722398.eu-central-1.elb.amazonaws.com/api', // Expected values: domain where the API is deployed, ex: http://stgbeta.pacbot.com/api
+            DEV_BASE_URL: 'http://internal-pacbot-1124722398.eu-central-1.elb.amazonaws.com/api', // Expected values: domain where the API is deployed, ex: http://devbeta.pacbot.com/api
             CLOUD_BASE_URL: '', // Expected values: domain where the API is deployed
         },
         featureModules: {
@@ -44,7 +44,7 @@ export const CONFIGURATIONS = {
         pacmanIssue: {
             CREATE_JIRA_TICKET_FOR_PACMAN_ISSUE: false, // Expected values: true || false || ''
             emailPacManIssue: {
-                ISSUE_MAIL_TEMPLATE_URL: '',
+                ISSUE_MAIL_TEMPLATE_URL: 'https://s3.eu-central-1.amazonaws.com/pacbot-data-eu-central-1-601034470122/pacman-v2-email-template',
                 ISSUE_EMAIL_FROM_ID: 'violations.support@pacbot.org',
             }
         },

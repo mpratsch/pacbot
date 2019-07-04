@@ -32,7 +32,7 @@ TOOLS_REQUIRED = {
 }
 
 PYTHON_PACKAGES_REQUIRED = [
-    ("docker", "Client"),
+    ("docker", "DockerClient"),
     "boto3"
 ]
 

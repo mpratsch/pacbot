@@ -1,5 +1,5 @@
 from datetime import datetime
-from docker import Client
+from docker import DockerClient, APIClient
 import json
 import boto3
 import base64
@@ -27,10 +27,10 @@ def get_provider_credentials(provider, provider_json_file):
         aws_session_token = data['provider']['aws']['token']
         region_name = data['provider']['aws']['region']
 
-        return aws_access_key, aws_secret_key, region_name
+        return aws_access_key, aws_secret_key, aws_session_token, region_name
 
 
-def get_docker_push_aws_auth_config(aws_access_key, aws_secret_key, session_token, region_name, log_file):
+def get_docker_push_aws_auth_config(aws_access_key, aws_secret_key, aws_session_token, region_name, log_file):
     """
     Return AWS auth config for pushing docker image to ECR
 
@@ -48,14 +48,16 @@ def get_docker_push_aws_auth_config(aws_access_key, aws_secret_key, session_toke
         region_name=region_name,
         aws_access_key_id=aws_access_key,
         aws_secret_access_key=aws_secret_key,
-        aws_session_token=session_token)
+        aws_session_token=aws_session_token)
     write_to_log_file(log_file, " " * 10 + "Generating Auth token using boto3...")
 
     auth = ecr.get_authorization_token()
     token = auth["authorizationData"][0]["authorizationToken"]
     decoded_token = base64.b64decode(token).decode()
     username = decoded_token.split(':')[0]
+    write_to_log_file(log_file, "username: " + username)
     password = decoded_token.split(':')[1]
+    write_to_log_file(log_file, "password: " + password)
     auth_config_payload = {'username': username, 'password': password}
 
     write_to_log_file(log_file, " " * 10 + "Auth token has been generated!!!")
@@ -76,15 +78,17 @@ def build_docker_image(docker_file_dir, docker_file, repository, log_file):
     Returns:
         auth_config_payload (dict): AWS auth config
     """
-    docker_client = Client(base_url='unix://var/run/docker.sock')
+    docker_client = DockerClient(base_url='unix://var/run/docker.sock')
     write_to_debug_log(log_file, "Creating Docker image: %s ..." % str(repository))
 
-    info = docker_client.build(
+    info = docker_client.images.build(
         dockerfile=docker_file,
         tag=repository,
         path=docker_file_dir,
         rm=True,
-        stream=True)
+        # custom_context=True,
+        #stream=True,
+        use_config_proxy=True)
     with open(log_file, 'a') as f:
         for item in info:
             f.write("%s %s\n" % (" " * 10, str(item)))

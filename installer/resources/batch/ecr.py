@@ -5,7 +5,7 @@ from core.config import Settings
 from resources.s3.bucket import BucketStorage
 from distutils.dir_util import copy_tree
 from core.utils import run_command
-from docker import Client
+from docker import DockerClient
 import os
 import sys
 
