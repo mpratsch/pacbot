@@ -80,20 +80,23 @@ def build_docker_image(docker_file_dir, docker_file, repository, log_file):
     """
     docker_client = DockerClient(base_url='unix://var/run/docker.sock')
     write_to_debug_log(log_file, "Creating Docker image: %s ..." % str(repository))
+    try:
+      info = docker_client.images.build(
+          dockerfile=docker_file,
+          tag=repository,
+          path=docker_file_dir,
+          rm=True,
+          buildargs={'http_proxy':'http://proxy.r-services.at:57165','https_proxy':'http://proxy.r-services.at:57165'},
+          # custom_context=True,
+          #stream=True,
+          use_config_proxy=True)
+      with open(log_file, 'a') as f:
+          for item in info:
+              f.write("%s %s\n" % (" " * 10, str(item)))
 
-    info = docker_client.images.build(
-        dockerfile=docker_file,
-        tag=repository,
-        path=docker_file_dir,
-        rm=True,
-        # custom_context=True,
-        #stream=True,
-        use_config_proxy=True)
-    with open(log_file, 'a') as f:
-        for item in info:
-            f.write("%s %s\n" % (" " * 10, str(item)))
-
-    write_to_debug_log(log_file, "Docker image: %s has been created locally!!!" % str(repository))
+      write_to_debug_log(log_file, "Docker image: %s has been created locally!!!" % str(repository))
+    except Exception as e:
+        print("ErrorOnDockerImageBuild: %s" % str(e))
 
     return docker_client
 
